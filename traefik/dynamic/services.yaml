@@ -1,0 +1,136 @@
+http:
+  routers:
+    cockpit:
+      rule: "Host(`cockpit.dev.sby.test`) || Host(`cockpit.10.201.0.25.nip.io`)"
+      service: cockpit
+      entryPoints:
+        - websecure
+      tls: {}
+
+    files:
+      rule: "Host(`files.dev.sby.test`) || Host(`files.10.201.0.25.nip.io`)"
+      service: files
+      entryPoints:
+        - web
+      middlewares:
+        - redirect-https
+
+    files-https:
+      rule: "Host(`files.dev.sby.test`) || Host(`files.10.201.0.25.nip.io`)"
+      service: files
+      entryPoints:
+        - websecure
+      tls: {}
+
+    portainer:
+      rule: "Host(`portainer.dev.sby.test`) || Host(`portainer.10.201.0.25.nip.io`)"
+      service: portainer
+      entryPoints:
+        - websecure
+      tls: {}
+
+    vscode:
+      rule: "Host(`vscode.dev.sby.test`) || Host(`vscode.10.201.0.25.nip.io`)"
+      service: vscode
+      entryPoints:
+        - web
+      middlewares:
+        - redirect-https
+
+    vscode-https:
+      rule: "Host(`vscode.dev.sby.test`) || Host(`vscode.10.201.0.25.nip.io`)"
+      service: vscode
+      entryPoints:
+        - websecure
+      tls: {}
+
+    opencode:
+      rule: "Host(`opencode.dev.sby.test`) || Host(`opencode.10.201.0.25.nip.io`)"
+      service: opencode
+      entryPoints:
+        - web
+      middlewares:
+        - redirect-https
+
+    opencode-https:
+      rule: "Host(`opencode.dev.sby.test`) || Host(`opencode.10.201.0.25.nip.io`)"
+      service: opencode
+      entryPoints:
+        - websecure
+      tls: {}
+
+    openclaw:
+      rule: "Host(`openclaw.dev.sby.test`) || Host(`openclaw.10.201.0.25.nip.io`)"
+      service: openclaw
+      entryPoints:
+        - web
+      middlewares:
+        - redirect-https
+
+    openclaw-https:
+      rule: "Host(`openclaw.dev.sby.test`) || Host(`openclaw.10.201.0.25.nip.io`)"
+      service: openclaw
+      entryPoints:
+        - websecure
+      tls: {}
+
+    ebudgeting-fitrah:
+      rule: "Host(`ebudgeting-fitrah.dev.sby.test`)"
+      service: ebudgeting-fitrah
+      entryPoints:
+        - web
+
+    ebudgeting-fitrah-https:
+      rule: "Host(`ebudgeting-fitrah.dev.sby.test`)"
+      service: ebudgeting-fitrah
+      entryPoints:
+        - websecure
+      tls: {}
+
+  middlewares:
+    redirect-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  services:
+    cockpit:
+      loadBalancer:
+        servers:
+          - url: "https://10.201.0.25:9090"
+        serversTransport: insecure
+
+    files:
+      loadBalancer:
+        servers:
+          - url: "http://10.201.0.25:9091"
+
+    portainer:
+      loadBalancer:
+        servers:
+          - url: "https://10.201.0.25:9443"
+        serversTransport: insecure
+
+    vscode:
+      loadBalancer:
+        servers:
+          - url: "http://10.201.0.25:8443"
+
+    opencode:
+      loadBalancer:
+        servers:
+          - url: "http://10.201.0.25:5969"
+
+    openclaw:
+      loadBalancer:
+        servers:
+          - url: "http://10.201.0.25:18789"
+
+    ebudgeting-fitrah:
+      loadBalancer:
+        servers:
+          - url: "http://10.201.0.25:8881"
+
+  serversTransports:
+    insecure:
+      insecureSkipVerify: true

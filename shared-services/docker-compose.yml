@@ -1,0 +1,172 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: shared-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    env_file:
+      - stack.env
+    ports:
+      - "55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - shared-net
+
+  redis:
+    image: redis:7
+    container_name: shared-redis
+    restart: unless-stopped
+    command: >
+      sh -c "redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}"
+    env_file:
+      - stack.env
+    ports:
+      - "36379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - shared-net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: shared-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    env_file:
+      - stack.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=shared-net"
+      - "traefik.http.routers.pgadmin-http.rule=Host(`pgadmin.dev.sby.test`) || Host(`pgadmin.10.201.0.25.nip.io`)"
+      - "traefik.http.routers.pgadmin-http.entrypoints=web"
+      - "traefik.http.routers.pgadmin-http.middlewares=redirect-https@file"
+      - "traefik.http.routers.pgadmin-http.service=pgadmin"
+      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.dev.sby.test`) || Host(`pgadmin.10.201.0.25.nip.io`)"
+      - "traefik.http.routers.pgadmin.entrypoints=websecure"
+      - "traefik.http.routers.pgadmin.tls=true"
+      - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
+    networks:
+      - shared-net
+
+  minio:
+    image: minio/minio:latest
+    container_name: shared-minio
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    env_file:
+      - stack.env
+    volumes:
+      - minio_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=shared-net"
+      - "traefik.http.routers.minio-http.rule=Host(`minio.dev.sby.test`) || Host(`minio.10.201.0.25.nip.io`)"
+      - "traefik.http.routers.minio-http.entrypoints=web"
+      - "traefik.http.routers.minio-http.middlewares=redirect-https@file"
+      - "traefik.http.routers.minio-http.service=minio"
+      - "traefik.http.routers.minio.rule=Host(`minio.dev.sby.test`) || Host(`minio.10.201.0.25.nip.io`)"
+      - "traefik.http.routers.minio.entrypoints=websecure"
+      - "traefik.http.routers.minio.tls=true"
+      - "traefik.http.services.minio.loadbalancer.server.port=9001"
+    networks:
+      - shared-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: shared-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    env_file:
+      - stack.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=shared-net"
+      - "traefik.http.routers.rabbitmq-http.rule=Host(`rabbitmq.dev.sby.test`) || Host(`rabbitmq.10.201.0.25.nip.io`)"
+      - "traefik.http.routers.rabbitmq-http.entrypoints=web"
+      - "traefik.http.routers.rabbitmq-http.middlewares=redirect-https@file"
+      - "traefik.http.routers.rabbitmq-http.service=rabbitmq"
+      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.dev.sby.test`) || Host(`rabbitmq.10.201.0.25.nip.io`)"
+      - "traefik.http.routers.rabbitmq.entrypoints=websecure"
+      - "traefik.http.routers.rabbitmq.tls=true"
+      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+    networks:
+      - shared-net
+
+  adminer:
+    image: adminer:latest
+    container_name: shared-adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DESIGN: ${ADMINER_DESIGN}
+    env_file:
+      - stack.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=shared-net"
+      - "traefik.http.routers.adminer-http.rule=Host(`adminer.dev.sby.test`) || Host(`adminer.10.201.0.25.nip.io`)"
+      - "traefik.http.routers.adminer-http.entrypoints=web"
+      - "traefik.http.routers.adminer-http.middlewares=redirect-https@file"
+      - "traefik.http.routers.adminer-http.service=adminer"
+      - "traefik.http.routers.adminer.rule=Host(`adminer.dev.sby.test`) || Host(`adminer.10.201.0.25.nip.io`)"
+      - "traefik.http.routers.adminer.entrypoints=websecure"
+      - "traefik.http.routers.adminer.tls=true"
+      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+    networks:
+      - shared-net
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: shared-mailhog
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=shared-net"
+      - "traefik.http.routers.mailhog-http.rule=Host(`mail.dev.sby.test`) || Host(`mail.10.201.0.25.nip.io`)"
+      - "traefik.http.routers.mailhog-http.entrypoints=web"
+      - "traefik.http.routers.mailhog-http.middlewares=redirect-https@file"
+      - "traefik.http.routers.mailhog-http.service=mailhog"
+      - "traefik.http.routers.mailhog.rule=Host(`mail.dev.sby.test`) || Host(`mail.10.201.0.25.nip.io`)"
+      - "traefik.http.routers.mailhog.entrypoints=websecure"
+      - "traefik.http.routers.mailhog.tls=true"
+      - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
+    networks:
+      - shared-net
+
+  postgres-backup:
+    image: prodrigestivill/postgres-backup-local
+    container_name: shared-postgres-backup
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: shared-postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: 7
+    env_file:
+      - stack.env
+    volumes:
+      - ./backups:/backups
+    networks:
+      - shared-net
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  shared-net:
+    name: shared-net
+    driver: bridge

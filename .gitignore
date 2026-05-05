@@ -1,0 +1,16 @@
+# Shared services secrets
+shared-services/stack.env
+
+# Local backups and runtime artifacts
+shared-services/backups/*
+!shared-services/backups/.gitkeep
+
+# Traefik certs (private)
+traefik/certs/*
+!traefik/certs/.gitkeep
+
+# Common editor/system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
