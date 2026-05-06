@@ -5,6 +5,7 @@ Shared development infrastructure for Surabaya City Government projects.
 ## Repository layout
 
 - `shared-services/` contains shared Docker services deployed via Portainer stack.
+- `traefik/docker-compose.yml` contains the Traefik stack compose used by Portainer.
 - `traefik/dynamic/` contains Traefik file provider config (`services.yaml`, `tls.yaml`).
 - `traefik/certs/` is for local certificates and keys (not committed).
 
@@ -29,7 +30,10 @@ Path: `shared-services/docker-compose.yml`
 
 ## Traefik config
 
-Path: `traefik/dynamic/`
+Paths:
+
+- `traefik/docker-compose.yml` (Traefik stack)
+- `traefik/dynamic/` (file provider config)
 
 Current config is copied from `~/.config/traefik` and should be treated as source-controlled dynamic configuration.
 
@@ -39,6 +43,23 @@ To make this repo authoritative, update Traefik container bind mounts to use thi
 - Certs mount: `~/projects/surabaya-dev/traefik/certs:/etc/traefik/certs`
 
 After changing mounts, redeploy Traefik.
+
+## Traefik stack deployment in Portainer
+
+Path: `traefik/docker-compose.yml`
+
+### Local testing in Portainer
+
+1. Open Portainer -> Stacks -> Add stack.
+2. Paste or upload `traefik/docker-compose.yml`.
+3. Deploy stack.
+
+### Git mode in Portainer
+
+1. Push this repository to GitHub/GitLab/Gitea.
+2. In Portainer, create stack from Repository.
+3. Set compose path to `traefik/docker-compose.yml`.
+4. Deploy and optionally enable GitOps polling/webhook updates.
 
 ## HTTPS routing behavior
 

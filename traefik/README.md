@@ -4,6 +4,7 @@ This folder contains Traefik files used by the file provider.
 
 ## Structure
 
+- `docker-compose.yml`: Traefik stack definition to deploy from Portainer.
 - `dynamic/services.yaml`: HTTP routers, services, and middlewares.
 - `dynamic/tls.yaml`: TLS certificates and default certificate store.
 - `certs/`: local certificate and key files (ignored by git).
@@ -22,6 +23,6 @@ If you mount `~/projects/surabaya-dev/traefik/certs:/etc/traefik/certs`, place t
 
 ## Apply changes
 
-1. Edit files in `dynamic/`.
-2. Redeploy Traefik if needed (file provider watch is enabled, so many changes are hot-reloaded).
+1. Edit `docker-compose.yml` for stack-level Traefik changes and `dynamic/` for file-provider routing/TLS changes.
+2. In Portainer, redeploy stack from `traefik/docker-compose.yml`.
 3. Verify with `https://traefik.dev.sby.test` dashboard and target hostnames.
