@@ -89,6 +89,21 @@ http:
         - websecure
       tls: {}
 
+    9router:
+      rule: "Host(`9router.dev.sby.test`)"
+      service: 9router
+      entryPoints:
+        - web
+      middlewares:
+        - redirect-https
+
+    9router-https:
+      rule: "Host(`9router.dev.sby.test`)"
+      service: 9router
+      entryPoints:
+        - websecure
+      tls: {}
+
     ebudgeting-fitrah:
       rule: "Host(`ebudgeting-fitrah.dev.sby.test`)"
       service: ebudgeting-fitrah
@@ -145,6 +160,11 @@ http:
       loadBalancer:
         servers:
           - url: "http://10.201.0.25:18789"
+
+    9router:
+      loadBalancer:
+        servers:
+          - url: "http://10.201.0.25:20128"
 
     ebudgeting-fitrah:
       loadBalancer:
